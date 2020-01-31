@@ -10,15 +10,16 @@ package frc.robot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 
-public class RunShooter extends CommandBase {
+public class RunCentripetalShooter extends CommandBase {
   /**
-   * Creates a new RunShooter.
+   * Creates a new RunCentripetalShooter.
    */
   int oldPos = 0;
   int pos = 0;
   long time = 0;
   long oldTime = 0;
-  public RunShooter() {
+
+  public RunCentripetalShooter() {
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
@@ -27,11 +28,6 @@ public class RunShooter extends CommandBase {
   public void initialize() {
     SmartDashboard.putNumber("wheel 1 speed", 0.5);
     SmartDashboard.putNumber("wheel 2 speed", 0.5);
-    SmartDashboard.putNumber("wheel 3 speed", 0.5);
-
-    SmartDashboard.putNumber("feeder 1 speed", 0.25);
-    SmartDashboard.putNumber("feeder 2 speed", 0.25);
-    SmartDashboard.putNumber("feeder 3 speed", 0.25);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -39,15 +35,13 @@ public class RunShooter extends CommandBase {
   public void execute() {
     oldTime = time;
     time = System.nanoTime();
+
     oldPos = pos;
     pos = Robot.getEncoderValue();
-    SmartDashboard.putNumber("Current RPM", (pos - oldPos) / 1024.0 * (time - oldTime) * 60_000_000_000L);
-    Robot.spinFeeder1(SmartDashboard.getNumber("feeder 1 speed", 0.5));
-    Robot.spinFeeder2(SmartDashboard.getNumber("feeder 2 speed", 0.5));
-    Robot.spinFeeder3(SmartDashboard.getNumber("feeder 3 speed", 0.5));
+    SmartDashboard.putNumber("Raw Encoder", pos - oldPos);
+    SmartDashboard.putNumber("Current RPM", (pos - oldPos) / 1024.0 * (time - oldTime) / 1_000_000_000.0 * 60.0);
     Robot.spinWheel1(SmartDashboard.getNumber("wheel 1 speed", 0.5) * -1);
-    Robot.spinWheel2(SmartDashboard.getNumber("wheel 2 speed", 0.5) * -1);
-    Robot.spinWheel3(SmartDashboard.getNumber("wheel 3 speed", 0.5) * -1);
+    Robot.spinFeeder2(SmartDashboard.getNumber("wheel 2 speed", 0.5));
   }
 
   // Called once the command ends or is interrupted.
