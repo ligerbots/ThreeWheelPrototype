@@ -7,6 +7,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.Servo;
+import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -14,7 +16,9 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.revrobotics.CANEncoder;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 
 /**
@@ -29,16 +33,16 @@ public class Robot extends TimedRobot {
   private static final String kCustomAuto = "My Auto";
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
-  public static TalonSRX wheel1;
-  public static TalonSRX wheel2;
-  public static TalonSRX wheel3;
-
-  public static TalonSRX feeder1;
-  public static TalonSRX feeder2;
-  public static TalonSRX feeder3;
+  public static CANSparkMax wheel1;
+  public static CANSparkMax wheel2;
+  public static CANSparkMax wheel3;
+  public static Servo servo;
 
   public static RunCentripetalShooter shooterCommand;
 
+  public static SpeedControllerGroup shooter;
+
+  public static CANEncoder encoder;
 
 
   /**
@@ -50,16 +54,17 @@ public class Robot extends TimedRobot {
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
-    wheel1 = new TalonSRX(10);
+    wheel1 = new CANSparkMax(5, MotorType.kBrushless);
+    encoder = wheel1.getEncoder();
+    encoder.setVelocityConversionFactor(-2.666);
     //wheel2 = new TalonSRX(14);
-    wheel2 = new TalonSRX(2);
-    wheel3 = new TalonSRX(4);
+    wheel2 = new CANSparkMax(6, MotorType.kBrushless);
+    wheel3 = new CANSparkMax(7, MotorType.kBrushless);
 
-    feeder1 = new TalonSRX(11);
-    feeder2 = new TalonSRX(6);
-    //feeder3 = new TalonSRX(6);
+    shooter = new SpeedControllerGroup(wheel1, wheel2, wheel3);
 
-    feeder1.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 0);
+    servo = new Servo(0);
+
     shooterCommand = new RunCentripetalShooter();
   }
 
@@ -76,10 +81,14 @@ public class Robot extends TimedRobot {
   }
 
   public static void spinWheel1 (double speed) {
-    wheel1.set(ControlMode.PercentOutput, speed);
+    shooter.set(-speed);
   }
 
-  public static void spinWheel2 (double speed) {
+  public static void setHood (double angle) {
+    servo.setAngle(angle);
+  }
+
+  /*public static void spinWheel2 (double speed) {
     wheel2.set(ControlMode.PercentOutput, speed);
   }
 
@@ -97,7 +106,7 @@ public class Robot extends TimedRobot {
 
   public static void spinFeeder3 (double speed) {
     feeder3.set(ControlMode.PercentOutput, speed);
-  }
+  }*/
 
   /**
    * This autonomous (along with the chooser code above) shows how to select
@@ -137,7 +146,6 @@ public class Robot extends TimedRobot {
   public void teleopInit() {
     // TODO Auto-generated method stub
     super.teleopInit();
-    wheel1.setSelectedSensorPosition(0);
     shooterCommand.schedule();
   }
   /**
@@ -155,8 +163,8 @@ public class Robot extends TimedRobot {
   public void testPeriodic() {
   }
 
-  public static int getEncoderValue () {
-    //return wheel1.getSelectedSensorPosition();
-    return feeder1.getSelectedSensorPosition();
-  }
+  // public static int getEncoderValue () {
+  //   //return wheel1.getSelectedSensorPosition();
+  //   return feeder1.getSelectedSensorPosition();
+  // }
 }
